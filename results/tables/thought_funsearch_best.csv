@@ -1,0 +1,95 @@
+method,score,thought,code,metrics
+thought_funsearch,-5822.379279391155,"Idea name: Blocking- and Congestion-Aware Greedy for PFSP (BCAG-PFSP)
+
+Key principles
+- Front-machine blocking: long first-machine processing p_{j,1} increases idle time for all following jobs; prefer smaller p_{j,1} when tie-breaking.
+- Downstream congestion: long processing on later machines can propagate delays; weight later machines to reflect this risk.
+- Total workload: account for the overall processing burden of a candidate to avoid clustering large work in a single region of the sequence.
+- Pragmatic construction: build permutation left-to-right by selecting the next job that minimizes projected schedule disruption, with a congestion penalty to balance blocking and throughput.
+
+Algorithm outline
+1) Initialization
+   - A[m] = 0 for m = 1..M (availability times of machines 1..M)
+   - C = 0 (current makespan)
+   - S = [] (constructed sequence)
+   - U = {all jobs j = 1..N}
+
+2) Iterative construction (repeat until U is empty)
+   - For each candidate job j in U, simulate appending j to the current prefix:
+     - t1 = A[1] + p[j,1]
+     - For m = 2..M: t[m] = max(A[m], t[m-1]) + p[j,m]
+     - finish_j = t[M]
+     - incremental_makespan = max(C, finish_j) - C
+     - congestion_score_j = sum_{m=1..M} w[m] * p[j,m], with w[m] increasing in m (e.g., w = [1,2,...,M])
+     - score_j = incremental_makespan + λ * congestion_score_j
+       (λ is a small positive parameter controlling the weight of downstream congestion)
+
+   - Choose j* in U with the smallest score_j; tie-break on smaller p[j*,1] (less blocking) or smaller total workload W_j = sum_m p[j*,m].
+
+   - Update after selecting j*:
+     - S <- S ∪ {j*}
+     - For m = 1..M: A[m] <- t[m] computed for j*
+     - C <- max(C, finish_{j*})
+     - U <- U \ {j*}
+
+3) Optional local refinement
+   - Do a few passes of adjacent swaps in S that reduce the makespan considering the blocking penalty (recompute objective after each swap).
+
+4) Output
+   - Final permutation S and the implied schedule on M machines.
+
+Notes on implementation
+- Complexity: per iteration, evaluate at most |U| candidates with O(M) simulations; total roughly O(N^2 M), practical for moderate PFSP sizes.
+- Parameter choices: choose λ small (e.g., 0.1–1) and w[m] increasing (e.g., w[m] = m) to emphasize downstream impact without overwhelming the primary makespan goal.
+- Variants: remove λ to get a pure incremental-makespan greedy; swap to a bidirectional (front and back) construction to allow better early/late balance; incorporate a simple tie-breaker on total workload.
+
+Plausible expected behavior
+- Early placement of jobs with small p_{j,1} reduces front-machine blocking.
+- Weighting later machines helps prevent piling long jobs on downstream machines, mitigating cascading delays.
+- Balancing incremental makespan with downstream congestion yields robust sequences across varying workload profiles.","def priority(job, proc_times, sequence):
+    """"""
+    Blocking- and Congestion-Aware Greedy (BCAG) priority score for a candidate job.
+
+    Returns a tuple (base_score, first_machine_time, total_workload) to enable
+    lexicographic tie-breaking: prefer smaller base_score, then smaller p[j,1],
+    then smaller total workload.
+    """"""
+    lam = 0.5  # congestion weight (λ)
+
+    N = len(proc_times)
+    M = len(proc_times[0]) if N > 0 else 0
+    if M == 0:
+        return (0.0, 0.0, 0.0)
+
+    # Compute machine availabilities A[m] after scheduling the current sequence
+    A = [0.0] * M
+    C = 0.0
+    for j in sequence:
+        t = [0.0] * M
+        t[0] = A[0] + proc_times[j][0]
+        for m in range(1, M):
+            t[m] = max(A[m], t[m - 1]) + proc_times[j][m]
+        C = max(C, t[M - 1])
+        A = t
+
+    # Evaluate candidate 'job'
+    j = job
+    t = [0.0] * M
+    t[0] = A[0] + proc_times[j][0]
+    for m in range(1, M):
+        t[m] = max(A[m], t[m - 1]) + proc_times[j][m]
+    finish_j = t[M - 1]
+
+    incremental_makespan = max(C, finish_j) - C
+
+    # Congestion score: weighted sum of processing times on later machines
+    congestion = 0.0
+    W = 0.0
+    for m in range(M):
+        w = m + 1  # weights increasing with machine index
+        congestion += w * proc_times[j][m]
+        W += proc_times[j][m]
+
+    base_score = incremental_makespan + lam * congestion
+
+    return (base_score, proc_times[j][0], W)","{'train': {'method': 'thought_funsearch_train_iter0_cand4', 'n_instances': 105, 'avg_makespan': 7248.857142857143, 'median_makespan': 4498.0, 'best_makespan': 173.0, 'worst_makespan': 29802.0, 'avg_runtime_sec': 2.788583003614275, 'avg_gap_percent': None}, 'val': {'method': 'thought_funsearch_val_iter0_cand4', 'n_instances': 22, 'avg_makespan': 5822.363636363636, 'median_makespan': 5364.5, 'best_makespan': 1391.0, 'worst_makespan': 28594.0, 'avg_runtime_sec': 1.5643027519320392, 'avg_gap_percent': None}}"

@@ -1,0 +1,26 @@
+{
+  "iteration": 0,
+  "candidate_idx": 5,
+  "score": -6114.500198555077,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter0_cand5",
+    "n_instances": 105,
+    "avg_makespan": 7480.457142857143,
+    "median_makespan": 4642.0,
+    "best_makespan": 161.0,
+    "worst_makespan": 30818.0,
+    "avg_runtime_sec": 0.03892865552833038,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_val_iter0_cand5",
+    "n_instances": 22,
+    "avg_makespan": 6114.5,
+    "median_makespan": 5792.5,
+    "best_makespan": 1387.0,
+    "worst_makespan": 30503.0,
+    "avg_runtime_sec": 0.01985550768123093,
+    "avg_gap_percent": null
+  },
+  "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    if sequence is None:\n        seq = []\n    else:\n        seq = sequence\n\n    # total processing time of candidate job\n    total_work = 0\n    row = proc_times[job]\n    for t in row:\n        total_work += t\n\n    # backlog on first machine from already scheduled jobs\n    backlog_before = 0\n    for j in seq:\n        backlog_before += proc_times[j][0]\n\n    # first-machine time for candidate job (0 if unavailable)\n    ftime = 0\n    if len(row) > 0:\n        ftime = row[0]\n\n    backlog_after = backlog_before + ftime\n\n    score = - total_work - backlog_after\n    return score"
+}

@@ -1,0 +1,26 @@
+{
+  "iteration": 0,
+  "candidate_idx": 4,
+  "score": -6115.88926001909,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter0_cand4",
+    "n_instances": 105,
+    "avg_makespan": 7593.171428571429,
+    "median_makespan": 4648.0,
+    "best_makespan": 173.0,
+    "worst_makespan": 31166.0,
+    "avg_runtime_sec": 4.453095787723682,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_val_iter0_cand4",
+    "n_instances": 22,
+    "avg_makespan": 6115.863636363636,
+    "median_makespan": 5875.0,
+    "best_makespan": 1560.0,
+    "worst_makespan": 30341.0,
+    "avg_runtime_sec": 2.562365545414981,
+    "avg_gap_percent": null
+  },
+  "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    total_job = 0\n    row = proc_times[job]\n    for t in row:\n        total_job += t\n\n    front = row[0] if len(row) > 0 else 0\n    last = row[-1] if len(row) > 0 else 0\n\n    # remaining workload of unscheduled jobs (excluding this candidate)\n    rem = 0\n    n_jobs = len(proc_times)\n    for j in range(n_jobs):\n        if j == job:\n            continue\n        in_seq = False\n        for s in sequence:\n            if s == j:\n                in_seq = True\n                break\n        if in_seq:\n            continue\n        for t in proc_times[j]:\n            rem += t\n\n    # workload contributing to the front machine by already scheduled jobs\n    scheduled_front = 0\n    for s in sequence:\n        scheduled_front += proc_times[s][0]\n\n    score = total_job - 0.5 * front + 0.2 * rem - 0.25 * last - 0.05 * scheduled_front\n    return score"
+}

@@ -1,0 +1,4 @@
+method,n_instances,avg_makespan,median_makespan,best_makespan,worst_makespan,avg_runtime_sec,avg_gap_percent
+direct_code,2,31.5,31.5,24.0,39.0,6.746199983354018e-05,18.872180451127818
+thought_to_code,2,31.5,31.5,24.0,39.0,3.8484500009872136e-05,18.872180451127818
+random_thought_to_code,2,31.5,31.5,24.0,39.0,2.475049973327259e-05,18.872180451127818

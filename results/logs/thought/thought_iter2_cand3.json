@@ -1,0 +1,27 @@
+{
+  "iteration": 2,
+  "candidate_idx": 3,
+  "score": -287.1578947368421,
+  "train_metrics": {
+    "method": "thought_funsearch_train_iter2_cand3",
+    "n_instances": 1,
+    "avg_makespan": 24.0,
+    "median_makespan": 24.0,
+    "best_makespan": 24.0,
+    "worst_makespan": 24.0,
+    "avg_runtime_sec": 3.3070999961637426e-05,
+    "avg_gap_percent": 26.31578947368421
+  },
+  "val_metrics": {
+    "method": "thought_funsearch_train_iter2_cand3",
+    "n_instances": 1,
+    "avg_makespan": 24.0,
+    "median_makespan": 24.0,
+    "best_makespan": 24.0,
+    "worst_makespan": 24.0,
+    "avg_runtime_sec": 3.3070999961637426e-05,
+    "avg_gap_percent": 26.31578947368421
+  },
+  "thought": "intuition: schedule jobs that are likely to create bottlenecks on late machines earlier\nprimary_signal: high processing time on the last machine and high total workload\ntie_breaker: smaller middle-machine average\nexpected_effect: reduce waiting near the end of the line",
+  "code": "def priority(job_id, unscheduled_jobs, proc_times, partial_sequence):\n    total = sum(proc_times[job_id])\n    imbalance = max(proc_times[job_id]) - min(proc_times[job_id])\n    return total + 1.2 * proc_times[job_id][-1] - 0.3 * proc_times[job_id][0] + 0.15 * imbalance"
+}

@@ -1,0 +1,27 @@
+{
+  "iteration": 0,
+  "candidate_idx": 3,
+  "score": -6175.2272927914755,
+  "train_metrics": {
+    "method": "thought_funsearch_train_iter0_cand3",
+    "n_instances": 105,
+    "avg_makespan": 7586.257142857143,
+    "median_makespan": 4760.0,
+    "best_makespan": 165.0,
+    "worst_makespan": 31435.0,
+    "avg_runtime_sec": 0.0037338460618186564,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "thought_funsearch_val_iter0_cand3",
+    "n_instances": 22,
+    "avg_makespan": 6175.227272727273,
+    "median_makespan": 6058.5,
+    "best_makespan": 1422.0,
+    "worst_makespan": 30570.0,
+    "avg_runtime_sec": 0.0020064202835783362,
+    "avg_gap_percent": null
+  },
+  "thought": "Idea name: Blocking-Downstream Aware Greedy Permutation (BDAGP)\n\nCore intuition\n- Use a permutation-based heuristic that explicitly balances three competing pressures in PFSP with blocking: total workload pressure (tends to push large jobs earlier for throughput), downstream congestion risk (avoid placing jobs with heavy late-stage work too early), and front-machine blocking risk (avoid jobs that block M1 for long when next machines are unavailable).\n\nKey job features to compute once per job j\n- Total workload: W_j = sum over machines i of p_{i,j}\n- Late-stage tail: Tail_j = sum of processing on the last L machines (choose L = 2 or 3)\n- Front-block risk: Front_j \u2248 p_{1,j} (normalized) or a small function of p_{1,j} relative to the dataset\n\nGreedy scoring for ordering\n- Score_j = \u03b1 * W_j \u2212 \u03b2 * Tail_j \u2212 \u03b3 * Front_j\n  - \u03b1, \u03b2, \u03b3 > 0 control the trade-off between pushing large jobs early, avoiding heavy late-stage load, and reducing front-block risk.\n  - A larger Score_j makes a job more favorable to place next.\n\nConstruction procedure\n- Start with an empty sequence.\n- Maintain the set of unscheduled jobs S.\n- While S not empty:\n  - For each j in S, compute Score_j using current W_j, Tail_j, Front_j.\n  - Pick j* = argmax_j Score_j; append j* to the sequence.\n  - Remove j* from S; update any needed aggregates (W_j, Tail_j, Front_j) if dynamic re-estimation is used.\n- Optional: perform a light local search after the greedy pass (e.g., adjacent swaps) to further reduce the estimated makespan under a blocking-flow shop simulation.\n\nRationale on behavior\n- Large W_j jobs tend to be scheduled earlier due to \u03b1 * W_j term, improving throughput.\n- Large Tail_j penalties discourage placing jobs with heavy late-stage work too early, which helps reduce downstream congestion and blocking on late machines.\n- Large Front_j penalties reduce the chance of long blocking on the front machine by avoiding very long front-end processing when it would exacerbate blocking.\n\nOptional enhancements\n- Use a small lookahead simulation to estimate the incremental makespan for appending a candidate j, and replace Score_j with a predicted makespan increment plus the same feature penalties.\n- Adapt L (tail window) and the \u03b1,\u03b2,\u03b3 weights via small-scale cross-validation or problem-instance diagnostics.\n- Add a secondary tie-breaker (e.g., smaller p_{1,j} in case of equal scores) to promote smoother front-machine utilization.\n\nComplexity and practicality\n- Precomputing W_j, Tail_j, Front_j is O(nm) once.\n- Greedy construction is O(n^2) evaluations (constant-time score per candidate after precomputation).\n- Local search adds modest extra cost but can yield meaningful improvements on larger instances.\n- Works well when front-machine blocking and downstream congestion are significant drivers of makespan.",
+  "code": "def priority(job, proc_times, sequence):\n            total = 0\n            for t in proc_times[job]:\n                total += t\n            return -total"
+}

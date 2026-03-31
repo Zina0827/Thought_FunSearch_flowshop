@@ -1,0 +1,26 @@
+{
+  "iteration": 0,
+  "candidate_idx": 1,
+  "score": -6141.273016495909,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter0_cand1",
+    "n_instances": 105,
+    "avg_makespan": 7617.285714285715,
+    "median_makespan": 4666.0,
+    "best_makespan": 171.0,
+    "worst_makespan": 31307.0,
+    "avg_runtime_sec": 0.051515642504784326,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_val_iter0_cand1",
+    "n_instances": 22,
+    "avg_makespan": 6141.272727272727,
+    "median_makespan": 5853.5,
+    "best_makespan": 1586.0,
+    "worst_makespan": 30440.0,
+    "avg_runtime_sec": 0.028922318226911804,
+    "avg_gap_percent": null
+  },
+  "code": "def priority(job, proc_times, sequence):\n    total_work = 0\n    for t in proc_times[job]:\n        total_work += t\n\n    first_machine_load = 0\n    for j in sequence:\n        first_machine_load += proc_times[j][0]\n\n    seq_len = 0\n    for _ in sequence:\n        seq_len += 1\n\n    last_machine_time = proc_times[job][-1]\n\n    score = total_work * 5\n    score -= first_machine_load\n    score -= last_machine_time\n    if seq_len % 2 == 0:\n        score += 2\n\n    return score"
+}

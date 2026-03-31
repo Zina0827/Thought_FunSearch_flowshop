@@ -1,0 +1,194 @@
+[
+  {
+    "score": -6061.818204316839,
+    "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    p = proc_times[job]\n    first = p[0] if p else 0\n    total = 0\n    for t in p:\n        total += t\n    seq_len = len(sequence)\n    score = - first * 4 - total - seq_len\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand2",
+        "n_instances": 105,
+        "avg_makespan": 7447.27619047619,
+        "median_makespan": 4575.0,
+        "best_makespan": 160.0,
+        "worst_makespan": 31395.0,
+        "avg_runtime_sec": 0.004059186894890098,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand2",
+        "n_instances": 22,
+        "avg_makespan": 6061.818181818182,
+        "median_makespan": 5879.0,
+        "best_makespan": 1380.0,
+        "worst_makespan": 30331.0,
+        "avg_runtime_sec": 0.002249865665693175,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  },
+  {
+    "score": -6114.500198555077,
+    "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    if sequence is None:\n        seq = []\n    else:\n        seq = sequence\n\n    # total processing time of candidate job\n    total_work = 0\n    row = proc_times[job]\n    for t in row:\n        total_work += t\n\n    # backlog on first machine from already scheduled jobs\n    backlog_before = 0\n    for j in seq:\n        backlog_before += proc_times[j][0]\n\n    # first-machine time for candidate job (0 if unavailable)\n    ftime = 0\n    if len(row) > 0:\n        ftime = row[0]\n\n    backlog_after = backlog_before + ftime\n\n    score = - total_work - backlog_after\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand5",
+        "n_instances": 105,
+        "avg_makespan": 7480.457142857143,
+        "median_makespan": 4642.0,
+        "best_makespan": 161.0,
+        "worst_makespan": 30818.0,
+        "avg_runtime_sec": 0.03892865552833038,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand5",
+        "n_instances": 22,
+        "avg_makespan": 6114.5,
+        "median_makespan": 5792.5,
+        "best_makespan": 1387.0,
+        "worst_makespan": 30503.0,
+        "avg_runtime_sec": 0.01985550768123093,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  },
+  {
+    "score": -6115.88926001909,
+    "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    total_job = 0\n    row = proc_times[job]\n    for t in row:\n        total_job += t\n\n    front = row[0] if len(row) > 0 else 0\n    last = row[-1] if len(row) > 0 else 0\n\n    # remaining workload of unscheduled jobs (excluding this candidate)\n    rem = 0\n    n_jobs = len(proc_times)\n    for j in range(n_jobs):\n        if j == job:\n            continue\n        in_seq = False\n        for s in sequence:\n            if s == j:\n                in_seq = True\n                break\n        if in_seq:\n            continue\n        for t in proc_times[j]:\n            rem += t\n\n    # workload contributing to the front machine by already scheduled jobs\n    scheduled_front = 0\n    for s in sequence:\n        scheduled_front += proc_times[s][0]\n\n    score = total_job - 0.5 * front + 0.2 * rem - 0.25 * last - 0.05 * scheduled_front\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand4",
+        "n_instances": 105,
+        "avg_makespan": 7593.171428571429,
+        "median_makespan": 4648.0,
+        "best_makespan": 173.0,
+        "worst_makespan": 31166.0,
+        "avg_runtime_sec": 4.453095787723682,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand4",
+        "n_instances": 22,
+        "avg_makespan": 6115.863636363636,
+        "median_makespan": 5875.0,
+        "best_makespan": 1560.0,
+        "worst_makespan": 30341.0,
+        "avg_runtime_sec": 2.562365545414981,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  },
+  {
+    "score": -6141.273016495909,
+    "code": "def priority(job, proc_times, sequence):\n    total_work = 0\n    for t in proc_times[job]:\n        total_work += t\n\n    first_machine_load = 0\n    for j in sequence:\n        first_machine_load += proc_times[j][0]\n\n    seq_len = 0\n    for _ in sequence:\n        seq_len += 1\n\n    last_machine_time = proc_times[job][-1]\n\n    score = total_work * 5\n    score -= first_machine_load\n    score -= last_machine_time\n    if seq_len % 2 == 0:\n        score += 2\n\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand1",
+        "n_instances": 105,
+        "avg_makespan": 7617.285714285715,
+        "median_makespan": 4666.0,
+        "best_makespan": 171.0,
+        "worst_makespan": 31307.0,
+        "avg_runtime_sec": 0.051515642504784326,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand1",
+        "n_instances": 22,
+        "avg_makespan": 6141.272727272727,
+        "median_makespan": 5853.5,
+        "best_makespan": 1586.0,
+        "worst_makespan": 30440.0,
+        "avg_runtime_sec": 0.028922318226911804,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  },
+  {
+    "score": -6144.500028738314,
+    "code": "def priority(job, proc_times, sequence):\n    # Basic heuristic: prioritize shorter total processing time (SPT style)\n    times = proc_times[job]\n    total = 0\n    for t in times:\n        total += t\n    score = -total\n\n    # Slight bias towards smaller first-machine time to reduce front-loading\n    if times:\n        score += -times[0] * 0.1\n\n    # Contextual tie-break with the last scheduled job, if available\n    if sequence:\n        last = sequence[-1]\n        last_times = proc_times[last]\n        if last_times:\n            first_last = last_times[0]\n            first_cur = times[0] if times else 0\n            if first_last == first_cur:\n                score += 0.5\n            else:\n                score += -abs(first_last - first_cur) * 0.05\n\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand0",
+        "n_instances": 105,
+        "avg_makespan": 7572.152380952381,
+        "median_makespan": 4731.0,
+        "best_makespan": 163.0,
+        "worst_makespan": 31364.0,
+        "avg_runtime_sec": 0.0052057055179916675,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand0",
+        "n_instances": 22,
+        "avg_makespan": 6144.5,
+        "median_makespan": 5958.5,
+        "best_makespan": 1412.0,
+        "worst_makespan": 30601.0,
+        "avg_runtime_sec": 0.00287383136508817,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  },
+  {
+    "score": -6801.597613500169,
+    "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    # Only write code inside this function.\n    m = len(proc_times[0])\n    C = [0.0] * m\n    for j in sequence:\n        p = proc_times[j]\n        C[0] += p[0]\n        for s in range(1, m):\n            if C[s] < C[s - 1]:\n                C[s] = C[s - 1] + p[s]\n            else:\n                C[s] = C[s] + p[s]\n    makespan_current = C[-1]\n\n    p_job = proc_times[job]\n    C_next = C[:]\n    C_next[0] += p_job[0]\n    for s in range(1, m):\n        if C_next[s] < C_next[s - 1]:\n            C_next[s] = C_next[s - 1] + p_job[s]\n        else:\n            C_next[s] = C_next[s] + p_job[s]\n    makespan_if_after = C_next[-1]\n\n    score = makespan_current - makespan_if_after\n    total_p = sum(p_job)\n    score += total_p * 0.01\n    score += (-p_job[0]) * 0.02\n    score += (-p_job[-1]) * 0.01\n    return score",
+    "method": "direct_funsearch",
+    "thought": null,
+    "metrics": {
+      "train": {
+        "method": "direct_funsearch_train_iter0_cand3",
+        "n_instances": 105,
+        "avg_makespan": 8494.019047619047,
+        "median_makespan": 5003.0,
+        "best_makespan": 173.0,
+        "worst_makespan": 36258.0,
+        "avg_runtime_sec": 1.1929867261510698,
+        "avg_gap_percent": null
+      },
+      "val": {
+        "method": "direct_funsearch_val_iter0_cand3",
+        "n_instances": 22,
+        "avg_makespan": 6801.590909090909,
+        "median_makespan": 6672.5,
+        "best_makespan": 1545.0,
+        "worst_makespan": 35846.0,
+        "avg_runtime_sec": 0.6704409260154617,
+        "avg_gap_percent": null
+      }
+    },
+    "metadata": {
+      "generator": "openai",
+      "model": "gpt-5-nano-2025-08-07"
+    }
+  }
+]

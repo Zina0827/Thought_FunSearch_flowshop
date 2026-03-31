@@ -1,0 +1,26 @@
+{
+  "iteration": 2,
+  "candidate_idx": 5,
+  "score": -179.89473684210526,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter2_cand5",
+    "n_instances": 1,
+    "avg_makespan": 22.0,
+    "median_makespan": 22.0,
+    "best_makespan": 22.0,
+    "worst_makespan": 22.0,
+    "avg_runtime_sec": 2.8501000087999273e-05,
+    "avg_gap_percent": 15.789473684210526
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_train_iter2_cand5",
+    "n_instances": 1,
+    "avg_makespan": 22.0,
+    "median_makespan": 22.0,
+    "best_makespan": 22.0,
+    "worst_makespan": 22.0,
+    "avg_runtime_sec": 2.8501000087999273e-05,
+    "avg_gap_percent": 15.789473684210526
+  },
+  "code": "def priority(job_id, unscheduled_jobs, proc_times, partial_sequence):\n    total = sum(proc_times[job_id])\n    bottleneck = max(proc_times[job_id])\n    tail_avg = (proc_times[job_id][-1] + bottleneck) / 2.0\n    return total + 0.4 * tail_avg - 0.25 * proc_times[job_id][0]"
+}

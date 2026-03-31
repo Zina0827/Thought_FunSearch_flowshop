@@ -1,0 +1,26 @@
+{
+  "iteration": 1,
+  "candidate_idx": 2,
+  "score": -287.15789504712205,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter1_cand2",
+    "n_instances": 1,
+    "avg_makespan": 24.0,
+    "median_makespan": 24.0,
+    "best_makespan": 24.0,
+    "worst_makespan": 24.0,
+    "avg_runtime_sec": 3.102799973930814e-05,
+    "avg_gap_percent": 26.31578947368421
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_train_iter1_cand2",
+    "n_instances": 1,
+    "avg_makespan": 24.0,
+    "median_makespan": 24.0,
+    "best_makespan": 24.0,
+    "worst_makespan": 24.0,
+    "avg_runtime_sec": 3.102799973930814e-05,
+    "avg_gap_percent": 26.31578947368421
+  },
+  "code": "def priority(job_id, unscheduled_jobs, proc_times, partial_sequence):\n    total = sum(proc_times[job_id])\n    front = proc_times[job_id][0]\n    back = proc_times[job_id][-1]\n    imbalance = max(proc_times[job_id]) - min(proc_times[job_id])\n    return 0.45 * total + 1.0 * back - 0.35 * front + 0.2 * imbalance"
+}

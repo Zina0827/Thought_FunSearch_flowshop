@@ -1,0 +1,27 @@
+{
+  "iteration": 0,
+  "candidate_idx": 2,
+  "score": -6175.227291870719,
+  "train_metrics": {
+    "method": "thought_funsearch_train_iter0_cand2",
+    "n_instances": 105,
+    "avg_makespan": 7586.257142857143,
+    "median_makespan": 4760.0,
+    "best_makespan": 165.0,
+    "worst_makespan": 31435.0,
+    "avg_runtime_sec": 0.0036262949130364827,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "thought_funsearch_val_iter0_cand2",
+    "n_instances": 22,
+    "avg_makespan": 6175.227272727273,
+    "median_makespan": 6058.5,
+    "best_makespan": 1422.0,
+    "worst_makespan": 30570.0,
+    "avg_runtime_sec": 0.0019143445798280563,
+    "avg_gap_percent": null
+  },
+  "thought": "- Name: Blocking- and Congestion-Aware Large-Job-First (BCALJF)\n\n- Core idea\n  - Build a permutation that prefers placing large total-work jobs earlier while explicitly accounting for front-machine blocking risk and downstream congestion.\n\n- Key job metrics\n  - P_j = sum over machines i of p_{i,j} (total processing time of job j)\n  - M_j = max over machines i of p_{i,j} (longest operation of job j on any machine)\n  - D_j = sum over machines i of p_{i,j} * w_i, with downstream weights w_i increasing with machine index (e.g., w_i = i)\n\n- Scoring function\n  - Score_j = a * P_j + b * M_j + c * D_j\n  - a, b, c are nonnegative weights reflecting the importance of total workload, front-machine blocking potential, and downstream congestion, respectively\n\n- Constructive rule\n  - Compute Score_j for all jobs\n  - Sort jobs in nonincreasing order of Score_j to obtain the initial permutation (highest score scheduled first)\n\n- Optional refinement (local improvement)\n  - Do a lightweight adjacent-swap pass on the resulting permutation\n  - Accept a swap (j, k) if the estimated makespan under a blocking-aware simulation decreases\n  - Repeat until no improving adjacent swaps are found\n\n- Downstream and blocking considerations\n  - D_j emphasizes pushing heavier processing on later machines earlier to mitigate downstream buildup\n  - M_j penalizes very long single operations that can exacerbate front-machine blocking\n  - Front-machine blocking penalty is implicitly captured by combining P_j and M_j in Score_j\n\n- Complexity\n  - Score computation and sorting: O(n log n)\n  - Optional local refinement: O(n^2) for the swap phase, with a fast blocking-aware makespan estimate\n\n- When to use\n  - PFSP with significant front-machine blocking and noticeable downstream congestion\n  - Situations where total job weight and long operations interact with downstream bottlenecks (e.g., high variance in p_{i,j} across i)\n\n- Expected effect\n  - More favorable makespans when large jobs are scheduled earlier but without causing excessive downstream queuing or front-machine blocking\n  - Balanced permutation that reduces idle time due to blocking while preventing late, high-impact jobs from creating cascading delays\n\n- Notes\n  - Weights a, b, c can be tuned per instance or set via small preliminary experiments\n  - The heuristic remains scalable and can be integrated with a quick local search for modest gains",
+  "code": "def priority(job, proc_times, sequence):\n            total = 0\n            for t in proc_times[job]:\n                total += t\n            return -total"
+}

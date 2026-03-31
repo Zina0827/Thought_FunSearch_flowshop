@@ -1,0 +1,26 @@
+{
+  "iteration": 0,
+  "candidate_idx": 0,
+  "score": -6144.500028738314,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter0_cand0",
+    "n_instances": 105,
+    "avg_makespan": 7572.152380952381,
+    "median_makespan": 4731.0,
+    "best_makespan": 163.0,
+    "worst_makespan": 31364.0,
+    "avg_runtime_sec": 0.0052057055179916675,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_val_iter0_cand0",
+    "n_instances": 22,
+    "avg_makespan": 6144.5,
+    "median_makespan": 5958.5,
+    "best_makespan": 1412.0,
+    "worst_makespan": 30601.0,
+    "avg_runtime_sec": 0.00287383136508817,
+    "avg_gap_percent": null
+  },
+  "code": "def priority(job, proc_times, sequence):\n    # Basic heuristic: prioritize shorter total processing time (SPT style)\n    times = proc_times[job]\n    total = 0\n    for t in times:\n        total += t\n    score = -total\n\n    # Slight bias towards smaller first-machine time to reduce front-loading\n    if times:\n        score += -times[0] * 0.1\n\n    # Contextual tie-break with the last scheduled job, if available\n    if sequence:\n        last = sequence[-1]\n        last_times = proc_times[last]\n        if last_times:\n            first_last = last_times[0]\n            first_cur = times[0] if times else 0\n            if first_last == first_cur:\n                score += 0.5\n            else:\n                score += -abs(first_last - first_cur) * 0.05\n\n    return score"
+}

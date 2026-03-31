@@ -1,0 +1,20 @@
+method,score,code,metrics
+direct_funsearch,-6061.818204316839,"def priority(job, proc_times, sequence):
+    # You can ONLY use:
+    # - job
+    # - proc_times
+    # - sequence
+
+    # DO NOT use:
+    # job
+    # sequence
+    # sequence
+
+    p = proc_times[job]
+    first = p[0] if p else 0
+    total = 0
+    for t in p:
+        total += t
+    seq_len = len(sequence)
+    score = - first * 4 - total - seq_len
+    return score","{'train': {'method': 'direct_funsearch_train_iter0_cand2', 'n_instances': 105, 'avg_makespan': 7447.27619047619, 'median_makespan': 4575.0, 'best_makespan': 160.0, 'worst_makespan': 31395.0, 'avg_runtime_sec': 0.004059186894890098, 'avg_gap_percent': None}, 'val': {'method': 'direct_funsearch_val_iter0_cand2', 'n_instances': 22, 'avg_makespan': 6061.818181818182, 'median_makespan': 5879.0, 'best_makespan': 1380.0, 'worst_makespan': 30331.0, 'avg_runtime_sec': 0.002249865665693175, 'avg_gap_percent': None}}"

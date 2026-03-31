@@ -1,0 +1,26 @@
+{
+  "iteration": 0,
+  "candidate_idx": 3,
+  "score": -6801.597613500169,
+  "train_metrics": {
+    "method": "direct_funsearch_train_iter0_cand3",
+    "n_instances": 105,
+    "avg_makespan": 8494.019047619047,
+    "median_makespan": 5003.0,
+    "best_makespan": 173.0,
+    "worst_makespan": 36258.0,
+    "avg_runtime_sec": 1.1929867261510698,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "direct_funsearch_val_iter0_cand3",
+    "n_instances": 22,
+    "avg_makespan": 6801.590909090909,
+    "median_makespan": 6672.5,
+    "best_makespan": 1545.0,
+    "worst_makespan": 35846.0,
+    "avg_runtime_sec": 0.6704409260154617,
+    "avg_gap_percent": null
+  },
+  "code": "def priority(job, proc_times, sequence):\n    # You can ONLY use:\n    # - job\n    # - proc_times\n    # - sequence\n\n    # DO NOT use:\n    # job\n    # sequence\n    # sequence\n\n    # Only write code inside this function.\n    m = len(proc_times[0])\n    C = [0.0] * m\n    for j in sequence:\n        p = proc_times[j]\n        C[0] += p[0]\n        for s in range(1, m):\n            if C[s] < C[s - 1]:\n                C[s] = C[s - 1] + p[s]\n            else:\n                C[s] = C[s] + p[s]\n    makespan_current = C[-1]\n\n    p_job = proc_times[job]\n    C_next = C[:]\n    C_next[0] += p_job[0]\n    for s in range(1, m):\n        if C_next[s] < C_next[s - 1]:\n            C_next[s] = C_next[s - 1] + p_job[s]\n        else:\n            C_next[s] = C_next[s] + p_job[s]\n    makespan_if_after = C_next[-1]\n\n    score = makespan_current - makespan_if_after\n    total_p = sum(p_job)\n    score += total_p * 0.01\n    score += (-p_job[0]) * 0.02\n    score += (-p_job[-1]) * 0.01\n    return score"
+}

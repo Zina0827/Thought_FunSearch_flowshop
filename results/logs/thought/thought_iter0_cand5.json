@@ -1,0 +1,27 @@
+{
+  "iteration": 0,
+  "candidate_idx": 5,
+  "score": -6175.227292198524,
+  "train_metrics": {
+    "method": "thought_funsearch_train_iter0_cand5",
+    "n_instances": 105,
+    "avg_makespan": 7586.257142857143,
+    "median_makespan": 4760.0,
+    "best_makespan": 165.0,
+    "worst_makespan": 31435.0,
+    "avg_runtime_sec": 0.0036203555430152586,
+    "avg_gap_percent": null
+  },
+  "val_metrics": {
+    "method": "thought_funsearch_val_iter0_cand5",
+    "n_instances": 22,
+    "avg_makespan": 6175.227272727273,
+    "median_makespan": 6058.5,
+    "best_makespan": 1422.0,
+    "worst_makespan": 30570.0,
+    "avg_runtime_sec": 0.0019471250813115728,
+    "avg_gap_percent": null
+  },
+  "thought": "- Idea name: Block- and Downstream-Aware Permutation (BD-PFSP) Heuristic\n\n- Objective intuition:\n  - Capture front-machine blocking (idle time caused by downstream congestion).\n  - Respect downstream congestion by not piling too much workload on bottleneck machines.\n  - Use total workload (sum across machines) to decide whether large jobs should go earlier or later depending on current bottlenecks.\n  - Produce a plausible, scalable constructive method with small local search for improvement.\n\n- Notation (brief):\n  - J = {1,...,n} jobs, M = {1,...,m} machines in fixed order.\n  - p[i][j] = processing time of job j on machine i.\n  - \u03c0 = current permutation (sequence) of scheduled jobs.\n  - C[i][t] = completion time of the t-th job on machine i (under \u03c0).\n  - W_j = sum_i p[i][j] (total workload of job j).\n  - Large(j) = indicator if W_j is above a chosen threshold.\n\n- Construction phase (forward insertion with block-aware scoring):\n  1) Initialize with an empty sequence or a small seed (optional: use a standard PFSP heuristic like Palmer to seed \u03c0).\n  2) Repeat until all jobs are scheduled:\n     - For each unscheduled job j, consider appending j at the end of the current partial sequence \u03c0_partial.\n     - For each candidate j, simulate the full m-machine flow-shop schedule for the sequence \u03c0_partial followed by j, obtaining:\n       - Cmax(j): makespan of the full sequence with j appended.\n       - Block(j): total blocking-related idle time observed on front machines (the sum of idle times caused by downstream machines not ready to accept work).\n       - Downstream(j): a measure of downstream congestion created by placing j now (e.g., sum over i=2..m of excess wait implied by the current loads on machine i vs. i-1).\n     - Compute a composite score:\n       Score(j) = Cmax(j) + \u03b1\u00b7Block(j) + \u03b2\u00b7Downstream(j) \u2212 \u03b4\u00b7Large(j)\n       where \u03b1, \u03b2, \u03b4 are nonnegative weights and Large(j) helps prefer pushing large jobs earlier when downstream pressure is low.\n     - Select j with the smallest Score(j) and append it to \u03c0_partial.\n  3) Repeat until all jobs are scheduled to form the full permutation \u03c0.\n\n- Local search improvement (optional, lightweight):\n  - Perform a limited adjacent-swap (or 3-opt within a small window) on \u03c0 to reduce Cmax while monitoring changes in Block and Downstream penalties.\n  - Accept improvements (or use a small metropolis acceptance with a temperature) to escape local minima.\n\n- Key design choices and rationale:\n  - Scoring uses actual schedule simulation for accurate Cmax, plus explicit penalties for blocking and downstream congestion, which are central in PFSP with blocking phenomena.\n  - The Large(j) term introduces an adaptive preference: when downstream congestion is low, schedule large jobs earlier to avoid creating an oversized tail; when congestion is high, delay large jobs to alleviate rear-end bottlenecks.\n  - The forward-insertion approach keeps the method scalable and interpretable: at each step you choose the best local extension considering front- and downstream effects.\n  - We keep complexity manageable by:\n    - Limiting to appending one job at a time (O(n) candidates per step).\n    - Computing a schedule simulation per candidate (costs increase with n and m, but practical for moderate instances).\n    - Optional small-scale local search to refine the permutation.\n\n- Outputs:\n  - A permutation \u03c0 that balances: minimal makespan, reduced front-machine blocking, and mitigated downstream congestion, with adaptive handling of large jobs.\n\n- Practical notes:\n  - Weights \u03b1, \u03b2, \u03b4, and the Large(j) threshold can be tuned to reflect the process environment (e.g., stronger emphasis on blocking in highly blocking-prone lines, stronger emphasis on downstream congestion in heavily loaded lines).\n  If desired, the same framework can be extended to incorporate alternative congestion proxies (e.g., estimated queue lengths, machine utilizations) or to use a two-phase seed-and-improve approach.",
+  "code": "def priority(job, proc_times, sequence):\n            total = 0\n            for t in proc_times[job]:\n                total += t\n            return -total"
+}
