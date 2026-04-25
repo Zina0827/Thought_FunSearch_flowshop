@@ -2,6 +2,11 @@
 
 A research-ready starter framework for the permutation flow shop scheduling problem (PFSP).
 
+Traditional-method references and exploratory notebooks are kept in `traditional_method/`.
+The main notebooks are `traditional_method/Google_OR_Tool.ipynb` and
+`traditional_method/KamilGos_With_Flowshop1_Data.ipynb`; the supporting
+implementations from the KamilGos reference are under `traditional_method/KamilGos/`.
+
 ## What is included
 - Benchmark-aware parsers for simple PFSP files, Taillard PFSP files, and OR-Library multi-instance files
 - Split generation and split loading
