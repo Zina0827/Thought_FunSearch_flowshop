@@ -1,3 +1,5 @@
+"""Download and unpack external PFSP benchmark datasets used by experiments."""
+
 from __future__ import annotations
 
 import urllib.request
@@ -17,6 +19,7 @@ def _download(url: str, dest: Path) -> None:
 
 
 def download_taillard(save_dir: str | Path) -> Path:
+    """Download the Taillard flow shop archive into ``save_dir`` and extract it."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     archive_path = save_dir / 'taillard_flowshop.zip'
@@ -27,6 +30,7 @@ def download_taillard(save_dir: str | Path) -> Path:
 
 
 def download_orlibrary(save_dir: str | Path) -> list[Path]:
+    """Download OR-Library flow shop text files into ``save_dir``."""
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
     outputs: list[Path] = []

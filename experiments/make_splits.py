@@ -1,3 +1,5 @@
+"""Build reproducible PFSP dataset split files from raw benchmark data."""
+
 import os
 import random
 import argparse
@@ -7,6 +9,7 @@ import argparse
 # OR-Library parser
 # ======================
 def parse_orlib_file(path):
+    """Parse OR-Library PFSP instances for split-file generation."""
     instances = []
 
     with open(path, "r") as f:
@@ -51,6 +54,7 @@ def parse_orlib_file(path):
 # Taillard parser
 # ======================
 def parse_taillard_file(path):
+    """Parse Taillard PFSP instances for split-file generation."""
     instances = []
 
     with open(path, "r") as f:
@@ -96,6 +100,7 @@ def parse_taillard_file(path):
 # 自动识别 parser
 # ======================
 def parse_file(path):
+    """Dispatch to the supported parser based on file header text."""
     with open(path, "r") as f:
         head = f.read(200)
 
@@ -112,6 +117,7 @@ def parse_file(path):
 # 递归读取
 # ======================
 def load_all_instances(data_dir):
+    """Recursively parse all supported ``.txt`` benchmark files in a directory."""
     all_instances = []
 
     for root, _, files in os.walk(data_dir):
@@ -135,6 +141,7 @@ def load_all_instances(data_dir):
 # split
 # ======================
 def split_instances(instances):
+    """Shuffle instances and return train, validation, and test partitions."""
     random.shuffle(instances)
 
     n = len(instances)
@@ -149,6 +156,7 @@ def split_instances(instances):
 
 
 def save_split(instances, path):
+    """Write one split file containing an instance name per line."""
     with open(path, "w") as f:
         for inst in instances:
             f.write(inst["name"] + "\n")
@@ -158,6 +166,7 @@ def save_split(instances, path):
 # main
 # ======================
 def main():
+    """Parse CLI arguments and write train/validation/test split files."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", required=True)
     parser.add_argument("--splits_dir", required=True)

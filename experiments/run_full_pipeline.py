@@ -1,3 +1,5 @@
+"""Run the end-to-end PFSP benchmark pipeline from the command line."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,11 +11,15 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run_module(module: str, extra_args: list[str]) -> None:
+    """Run an experiment module as a checked subprocess from the repo root."""
+    # Running modules with ``-m`` keeps imports consistent with normal CLI usage
+    # and avoids relying on the caller's current working directory.
     cmd = [sys.executable, '-m', module] + extra_args
     subprocess.run(cmd, check=True, cwd=str(ROOT))
 
 
 def main() -> None:
+    """Parse pipeline options and run the selected experiment stages."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', choices=['baseline', 'direct', 'thought', 'ablation', 'all'], required=True)
     parser.add_argument('--provider', type=str, default='auto')
@@ -21,6 +27,8 @@ def main() -> None:
     parser.add_argument('--reasoning_effort', type=str, default='medium')
     args, unknown = parser.parse_known_args()
 
+    # Unknown arguments are forwarded so shared options such as data paths and
+    # output locations can be supplied once to the pipeline wrapper.
     if args.mode in {'baseline', 'all'}:
         run_module('experiments.run_baselines', unknown)
     if args.mode in {'direct', 'all'}:

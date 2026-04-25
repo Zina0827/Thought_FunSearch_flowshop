@@ -1,3 +1,5 @@
+"""Train and evaluate thought-augmented FunSearch PFSP heuristics."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,6 +25,7 @@ DEFAULT_TEST_OUTPUT = ROOT / 'results' / 'tables' / 'thought_funsearch_test.csv'
 
 
 def main() -> None:
+    """Parse CLI arguments, run thought-guided search, and test the best candidate."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default=str(DEFAULT_RAW_DIR))
     parser.add_argument('--splits_dir', type=str, default=str(DEFAULT_SPLITS_DIR))

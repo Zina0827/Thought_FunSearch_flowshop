@@ -1,3 +1,5 @@
+"""Generate natural-language heuristic thoughts for PFSP scheduling."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -25,13 +27,18 @@ expected_effect: process influential jobs early without creating too much front-
 
 @dataclass
 class CandidateThought:
+    """Generated heuristic thought plus prompt and provenance metadata."""
+
     thought: str
     prompt: str
     metadata: dict[str, Any]
 
 
 class StubThoughtGenerator:
+    """Deterministic fallback that cycles through hand-written heuristic thoughts."""
+
     def generate(self, n: int = 1, seed_description: str = '', elite_thoughts: list[str] | None = None) -> list[CandidateThought]:
+        """Return structured heuristic thoughts without calling an LLM."""
         prompt = build_thought_user_prompt(seed_description, elite_thoughts='\n\n'.join((elite_thoughts or [])[:2]))
         thoughts = []
         pool = (elite_thoughts or []) + DEFAULT_THOUGHTS
@@ -41,11 +48,16 @@ class StubThoughtGenerator:
 
 
 class OpenAIThoughtGeneratorError(RuntimeError):
+    """Raised when OpenAI-backed thought generation cannot run."""
+
     pass
 
 
 class OpenAIThoughtGenerator:
+    """OpenAI-backed generator for structured heuristic thoughts."""
+
     def __init__(self, model: str | None = None, reasoning_effort: str = 'medium', temperature: float | None = None) -> None:
+        """Create a thought generator using the configured OpenAI client."""
         self.model = model or os.getenv('OPENAI_MODEL', 'gpt-5')
         self.reasoning_effort = reasoning_effort
         self.temperature = temperature
@@ -91,10 +103,12 @@ class OpenAIThoughtGenerator:
         )
 
     def generate(self, n: int = 1, seed_description: str = '', elite_thoughts: list[str] | None = None) -> list[CandidateThought]:
+        """Generate ``n`` structured heuristic thoughts."""
         return [self._single_generate(seed_description=seed_description, elite_thoughts=elite_thoughts) for _ in range(n)]
 
 
 def build_thought_generator(provider: str = 'auto', **kwargs: Any) -> StubThoughtGenerator | OpenAIThoughtGenerator:
+    """Build a thought generator, using the stub fallback in ``auto`` mode."""
     provider = provider.lower().strip()
     if provider == 'stub':
         return StubThoughtGenerator()

@@ -1,3 +1,5 @@
+"""Parse PFSP benchmark files and dataset split definitions."""
+
 import os
 
 
@@ -5,6 +7,7 @@ import os
 # OR-Library parser
 # =========================
 def parse_orlib_file(path):
+    """Parse one OR-Library PFSP text file into instance dictionaries."""
     instances = []
 
     with open(path, "r") as f:
@@ -51,6 +54,7 @@ def parse_orlib_file(path):
 # Taillard parser
 # =========================
 def parse_taillard_file(path):
+    """Parse a Taillard PFSP text file into job-by-machine instances."""
     instances = []
 
     with open(path, "r") as f:
@@ -98,6 +102,7 @@ def parse_taillard_file(path):
 # Simple parser（兜底）
 # =========================
 def parse_simple_instance(path):
+    """Parse the fallback plain matrix format used by small local examples."""
     with open(path, "r") as f:
         lines = f.readlines()
 
@@ -132,6 +137,7 @@ def parse_simple_instance(path):
 # 自动识别 parser
 # =========================
 def load_instances_from_file(path, format_hint=None):
+    """Infer a supported PFSP file format and return parsed instances."""
     try:
         with open(path, "r") as f:
             head = f.read(300)
@@ -143,9 +149,13 @@ def load_instances_from_file(path, format_hint=None):
             return parse_taillard_file(path)
 
         else:
+            # The simple parser is intentionally last: it accepts many numeric
+            # files, so trying it earlier could misread structured benchmarks.
             return parse_simple_instance(path)
 
     except Exception as e:
+        # One malformed benchmark should not stop batch experiments over a whole
+        # directory; the warning keeps the skipped file visible in logs.
         print(f"[WARNING] Skipping {path}: {e}")
         return []
 
@@ -154,6 +164,7 @@ def load_instances_from_file(path, format_hint=None):
 # 递归读取目录
 # =========================
 def load_instances_from_dir(raw_dir, format_hint=None):
+    """Recursively load all ``.txt`` PFSP instances under ``raw_dir``."""
     instances = []
 
     for root, _, files in os.walk(raw_dir):
@@ -176,11 +187,15 @@ def load_instances_from_dir(raw_dir, format_hint=None):
 # split loader（供 experiments 用）
 # =========================
 def load_dataset_splits(raw_dir, splits_dir, format_hint=None):
+    """Load all raw instances and return train/val/test lists by split files."""
     all_instances = load_instances_from_dir(raw_dir, format_hint)
 
+    # Split files store stable names instead of serialized instances so raw data can
+    # be refreshed without rewriting the train/validation/test definitions.
     name_to_instance = {inst["name"]: inst for inst in all_instances}
 
     def load_split(file):
+        """Load one split-name file and resolve names to parsed instances."""
         path = os.path.join(splits_dir, file)
         if not os.path.exists(path):
             return []

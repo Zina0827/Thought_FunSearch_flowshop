@@ -1,3 +1,5 @@
+"""Run ablation experiments comparing thought quality and generated code."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,6 +23,7 @@ DEFAULT_OUTPUT = ROOT / 'results' / 'tables' / 'ablation_results.csv'
 
 
 def main() -> None:
+    """Parse CLI arguments and run the thought-vs-direct ablation evaluation."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default=str(DEFAULT_RAW_DIR))
     parser.add_argument('--splits_dir', type=str, default=str(DEFAULT_SPLITS_DIR))

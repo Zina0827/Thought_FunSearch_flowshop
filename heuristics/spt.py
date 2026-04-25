@@ -1,3 +1,5 @@
+"""Shortest-processing-time baseline priority rule for PFSP scheduling."""
+
 from __future__ import annotations
 
 from typing import Sequence
@@ -12,4 +14,5 @@ class SPTPriority:
         proc_times: Sequence[Sequence[int]],
         partial_sequence: Sequence[int],
     ) -> float:
+        """Return negative total processing time so shorter jobs score higher."""
         return -float(sum(proc_times[job_id]))

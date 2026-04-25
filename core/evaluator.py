@@ -1,3 +1,5 @@
+"""Evaluate scheduling priority functions on PFSP benchmark instances."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
@@ -11,6 +13,8 @@ from core.scheduler import build_schedule
 
 @dataclass
 class InstanceResult:
+    """Evaluation result for one method on one PFSP instance."""
+
     instance: str
     method: str
     sequence: list[int]
@@ -20,11 +24,14 @@ class InstanceResult:
     gap_percent: float | None = None
 
     def to_dict(self) -> dict:
+        """Serialize the per-instance result as a plain dictionary."""
         return asdict(self)
 
 
 @dataclass
 class EvaluationSummary:
+    """Aggregate metrics and detailed per-instance results for one method."""
+
     method: str
     n_instances: int
     avg_makespan: float
@@ -36,6 +43,7 @@ class EvaluationSummary:
     results: list[InstanceResult]
 
     def to_dict(self) -> dict:
+        """Serialize summary statistics without embedding per-instance rows."""
         return {
             'method': self.method,
             'n_instances': self.n_instances,
@@ -55,6 +63,7 @@ def evaluate_priority_function(
     references: dict[str, int] | None = None,
     maximize: bool = True,
 ) -> EvaluationSummary:
+    """Build schedules with ``priority_fn`` and summarize their PFSP performance."""
     results: list[InstanceResult] = []
 
     for inst in instances:

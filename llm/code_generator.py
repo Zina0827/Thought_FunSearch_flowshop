@@ -1,3 +1,5 @@
+"""Generate candidate PFSP priority-function code from prompts or stubs."""
+
 from __future__ import annotations
 import os
 from dataclasses import dataclass
@@ -36,6 +38,8 @@ def priority(job_id, proc_times, partial_sequence):
 
 @dataclass
 class CandidateCode:
+    """Generated priority-function code plus the prompt and provenance metadata."""
+
     code: str
     prompt: str
     metadata: dict[str, Any]
@@ -45,6 +49,7 @@ class StubCodeGenerator:
     """Deterministic offline fallback with light variation around elite examples."""
 
     def generate(self, n: int = 1, seed_description: str = '', elite_codes: list[str] | None = None) -> list[CandidateCode]:
+        """Return deterministic candidate code snippets without calling an LLM."""
         elite_examples = ''
         if elite_codes:
             elite_examples = '\n\n'.join(elite_codes[:2])
@@ -60,6 +65,8 @@ class StubCodeGenerator:
 
 
 class OpenAIGeneratorError(RuntimeError):
+    """Raised when OpenAI-backed direct code generation cannot run."""
+
     pass
 
 
@@ -72,6 +79,7 @@ class OpenAICodeGenerator:
         reasoning_effort: str = 'medium',
         temperature: float | None = None,
     ) -> None:
+        """Create an OpenAI-backed direct code generator."""
         self.model = model or os.getenv('OPENAI_MODEL', 'gpt-4o')
         self.reasoning_effort = reasoning_effort
         self.temperature = temperature
@@ -113,6 +121,8 @@ class OpenAICodeGenerator:
 
         for f in forbidden:
             if f in code:
+                # The sandbox will reject unsafe constructs later; replacing early
+                # keeps the search loop moving when a model ignores the prompt.
                 print(f"⚠️ Removing unsafe code: {f}")
                 return """def priority(job, proc_times, sequence):
         total = 0
@@ -123,6 +133,8 @@ class OpenAICodeGenerator:
         return code
     
     def _fix_variables(self, code: str) -> str:
+        # Older prompt templates used different parameter names; normalizing them
+        # preserves useful generated formulas instead of discarding the candidate.
         code = code.replace("job_id", "job")
         code = code.replace("partial_sequence", "sequence")
         code = code.replace("unscheduled_jobs", "sequence")  # 或直接删
@@ -219,10 +231,12 @@ class OpenAICodeGenerator:
         )
 
     def generate(self, n: int = 1, seed_description: str = '', elite_codes: list[str] | None = None) -> list[CandidateCode]:
+        """Generate ``n`` candidate priority functions from the configured model."""
         return [self._single_generate(seed_description=seed_description, elite_codes=elite_codes) for _ in range(n)]
 
 
 def build_code_generator(provider: str = 'auto', **kwargs: Any) -> StubCodeGenerator | OpenAICodeGenerator:
+    """Build a direct code generator, falling back to the stub in ``auto`` mode."""
     provider = provider.lower().strip()
     if provider == 'stub':
         return StubCodeGenerator()

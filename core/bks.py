@@ -1,3 +1,5 @@
+"""Load best-known solution references for benchmark PFSP instances."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -31,6 +33,7 @@ def default_bks() -> dict[str, int]:
 
 
 def load_bks(path: str | Path | None = None) -> dict[str, int]:
+    """Return built-in BKS values updated with optional CSV or JSON references."""
     references = default_bks()
     if path is None:
         return references

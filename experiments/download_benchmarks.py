@@ -1,3 +1,5 @@
+"""Command-line entry point for downloading PFSP benchmark data."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,6 +12,7 @@ DEFAULT_RAW_DIR = ROOT / 'data' / 'raw'
 
 
 def main() -> None:
+    """Parse CLI flags and download the requested benchmark collections."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--raw_dir', type=str, default=str(DEFAULT_RAW_DIR))
     parser.add_argument('--taillard', action='store_true')

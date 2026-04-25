@@ -1,3 +1,5 @@
+"""Prompt templates for direct code generation and thought-guided generation."""
+
 from __future__ import annotations
 
 DIRECT_CODE_SYSTEM_PROMPT = """You design priority functions for permutation flow shop scheduling.
@@ -39,6 +41,7 @@ Implement the stated primary signal and tie-breaker faithfully.
 
 
 def build_direct_code_user_prompt(seed_description: str = '', example_features: str = '', elite_examples: str = '') -> str:
+    """Build the user prompt for direct priority-function code generation."""
     description = seed_description.strip() or 'Design a strong priority heuristic for minimizing makespan in permutation flow shop scheduling.'
     features = example_features.strip() or (
         'Available signals include total job processing time, first-machine time, last-machine time, '
@@ -55,6 +58,7 @@ def build_direct_code_user_prompt(seed_description: str = '', example_features: 
 
 
 def build_thought_user_prompt(seed_description: str = '', example_features: str = '', elite_thoughts: str = '') -> str:
+    """Build the user prompt for generating a structured heuristic thought."""
     description = seed_description.strip() or 'Design a concise, plausible PFSP heuristic idea.'
     features = example_features.strip() or (
         'You may reason about front-machine blocking, downstream congestion, total workload, '
@@ -67,6 +71,7 @@ def build_thought_user_prompt(seed_description: str = '', example_features: str 
 
 
 def build_thought_to_code_user_prompt(thought: str, elite_code_context: str = '') -> str:
+    """Build the prompt that asks a model to translate a thought into code."""
     prompt = f'Heuristic thought:\n{thought}\n\nTranslate it into the required Python function.'
     if elite_code_context.strip():
         prompt += '\n\nReference patterns from previous strong code candidates:\n' + elite_code_context.strip()

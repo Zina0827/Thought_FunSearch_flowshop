@@ -1,3 +1,5 @@
+"""Shared dataset-loading helpers for experiment scripts."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -14,6 +16,7 @@ DEFAULT_BKS_PATH = ROOT / 'data' / 'processed' / 'bks.csv'
 
 
 def get_requested_split(raw_dir: str, splits_dir: str, split: str, format_hint: str = '') -> tuple[list[PFSPInstance], list[PFSPInstance], list[PFSPInstance], dict[str, int]]:
+    """Return the requested primary split plus auxiliary splits and BKS references."""
     dataset = load_dataset_splits(raw_dir, splits_dir, format_hint=format_hint or None)
     references = load_bks(DEFAULT_BKS_PATH)
     train, val, test = dataset.train, dataset.val, dataset.test

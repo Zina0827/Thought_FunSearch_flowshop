@@ -1,3 +1,5 @@
+"""Summarize generated CSV result tables into a compact text report."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,6 +13,7 @@ DEFAULT_SUMMARY_PATH = DEFAULT_TABLE_DIR / 'all_tables_summary.txt'
 
 
 def summarize_csv(path: Path) -> list[dict]:
+    """Read one CSV result table into a list of row dictionaries."""
     rows = []
     with path.open('r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -19,6 +22,7 @@ def summarize_csv(path: Path) -> list[dict]:
 
 
 def main() -> None:
+    """Parse CLI arguments and write a text summary of result-table schemas."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--table_dir', type=str, default=str(DEFAULT_TABLE_DIR))
     parser.add_argument('--output', type=str, default=str(DEFAULT_SUMMARY_PATH))
@@ -39,8 +43,7 @@ def main() -> None:
         lines.append('')
 
     output = Path(args.output)
-    output.write_text('
-'.join(lines), encoding='utf-8')
+    output.write_text('\n'.join(lines), encoding='utf-8')
     print(output.read_text(encoding='utf-8'))
 
 

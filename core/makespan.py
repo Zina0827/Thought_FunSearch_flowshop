@@ -1,9 +1,12 @@
+"""Compute completion-time tables and makespans for PFSP job sequences."""
+
 from __future__ import annotations
 
 from typing import Sequence
 
 
 def compute_completion_times(order: Sequence[int], proc_times: Sequence[Sequence[int]]) -> list[list[int]]:
+    """Return completion times for each scheduled job position and machine."""
     if not order:
         return []
     n_jobs = len(order)
@@ -25,6 +28,7 @@ def compute_completion_times(order: Sequence[int], proc_times: Sequence[Sequence
 
 
 def compute_makespan(order: Sequence[int], proc_times: Sequence[Sequence[int]]) -> int:
+    """Return the final completion time for ``order`` on the PFSP instance."""
     if not order:
         return 0
     completion = compute_completion_times(order, proc_times)

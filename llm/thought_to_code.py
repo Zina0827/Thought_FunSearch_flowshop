@@ -1,3 +1,5 @@
+"""Convert heuristic thoughts into executable PFSP priority functions."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -10,6 +12,8 @@ from llm.prompts import THOUGHT_TO_CODE_SYSTEM_PROMPT, build_thought_to_code_use
 
 @dataclass
 class ThoughtCodePair:
+    """A heuristic thought paired with generated priority-function code."""
+
     thought: str
     code: str
     prompt: str
@@ -17,7 +21,10 @@ class ThoughtCodePair:
 
 
 class StubThoughtToCodeGenerator:
+    """Deterministic fallback that maps thought keywords to code templates."""
+
     def generate_code(self, thought: str, elite_codes: list[str] | None = None) -> ThoughtCodePair:
+        """Translate a thought into candidate code without calling an LLM."""
         prompt = build_thought_to_code_user_prompt(thought, elite_code_context='\n\n'.join((elite_codes or [])[:2]))
         lowered = thought.lower()
         if 'last machine' in lowered or 'late machine' in lowered:
@@ -45,11 +52,16 @@ def priority(job_id, unscheduled_jobs, proc_times, partial_sequence):
 
 
 class OpenAIThoughtToCodeError(RuntimeError):
+    """Raised when OpenAI-backed thought-to-code generation cannot run."""
+
     pass
 
 
 class OpenAIThoughtToCodeGenerator:
+    """OpenAI-backed generator that converts thoughts into priority functions."""
+
     def __init__(self, model: str | None = None, reasoning_effort: str = 'medium', temperature: float | None = None) -> None:
+        """Create a thought-to-code generator using the configured OpenAI client."""
         self.model = model or os.getenv('OPENAI_MODEL', 'gpt-5')
         self.reasoning_effort = reasoning_effort
         self.temperature = temperature
@@ -71,6 +83,7 @@ class OpenAIThoughtToCodeGenerator:
         return text
 
     def generate_code(self, thought: str, elite_codes: list[str] | None = None) -> ThoughtCodePair:
+        """Generate candidate priority-function code for one heuristic thought."""
         prompt = f"""
                 Convert the following idea into Python code:
 
@@ -141,6 +154,7 @@ class OpenAIThoughtToCodeGenerator:
 
 
 def build_thought_to_code_generator(provider: str = 'auto', **kwargs: Any) -> StubThoughtToCodeGenerator | OpenAIThoughtToCodeGenerator:
+    """Build a thought-to-code generator, using the stub fallback in ``auto`` mode."""
     provider = provider.lower().strip()
     if provider == 'stub':
         return StubThoughtToCodeGenerator()

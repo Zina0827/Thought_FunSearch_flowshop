@@ -1,3 +1,5 @@
+"""Evaluate classical PFSP baseline heuristics on a selected split."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -25,6 +27,7 @@ DEFAULT_SUMMARY = ROOT / 'results' / 'tables' / 'baseline_summary.csv'
 
 
 def main() -> None:
+    """Parse CLI arguments and evaluate baseline heuristics on one split."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_dir', type=str, default=str(DEFAULT_RAW_DIR))
     parser.add_argument('--splits_dir', type=str, default=str(DEFAULT_SPLITS_DIR))

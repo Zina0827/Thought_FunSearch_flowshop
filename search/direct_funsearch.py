@@ -1,3 +1,5 @@
+"""Run direct code-generation search for PFSP priority functions."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,7 +13,10 @@ from search.selection import diversify_elites, objective_from_summary
 
 
 class DirectFunSearch:
+    """Search loop that asks a code generator for priority functions directly."""
+
     def __init__(self, population_size: int = 8, generator: object | None = None, novelty_weight: float = 0.05) -> None:
+        """Create a direct search runner with an optional generator implementation."""
         self.population = Population(max_size=population_size, novelty_weight=novelty_weight)
         self.generator = generator or StubCodeGenerator()
 
@@ -25,12 +30,15 @@ class DirectFunSearch:
         seed_description: str = '',
         references: dict[str, int] | None = None,
     ) -> Population:
+        """Generate, sandbox, evaluate, and retain candidate priority functions."""
         log_path = Path(log_dir) if log_dir else None
         if log_path:
             log_path.mkdir(parents=True, exist_ok=True)
 
         val_instances = val_instances or []
         for step in range(iterations):
+            # Elite examples are fed back into the prompt so later generations can
+            # exploit good patterns while the novelty term keeps the pool varied.
             elites = diversify_elites(self.population.topk(), k=3, seed=42 + step)
             elite_codes = [candidate.code for candidate in elites]
             raw_candidates = self.generator.generate(
@@ -48,6 +56,8 @@ class DirectFunSearch:
                         references=references,
                     )
                     if val_instances:
+                        # Prefer validation performance for ranking when available;
+                        # this reduces overfitting to the instances used for prompts.
                         val_summary = evaluate_priority_function(
                             method_name=f'direct_funsearch_val_iter{step}_cand{idx}',
                             instances=val_instances,

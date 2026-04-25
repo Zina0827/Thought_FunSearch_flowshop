@@ -1,3 +1,5 @@
+"""Run thought-augmented search that converts heuristic ideas into code."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,6 +14,8 @@ from search.selection import diversify_elites, objective_from_summary
 
 
 class ThoughtFunSearch:
+    """Search loop that first generates heuristic thoughts, then turns them into code."""
+
     def __init__(
         self,
         population_size: int = 8,
@@ -19,6 +23,7 @@ class ThoughtFunSearch:
         code_generator: object | None = None,
         novelty_weight: float = 0.05,
     ) -> None:
+        """Create a thought-guided search runner with optional generator objects."""
         self.population = Population(max_size=population_size, novelty_weight=novelty_weight)
         self.thought_generator = thought_generator or StubThoughtGenerator()
         self.code_generator = code_generator or StubThoughtToCodeGenerator()
@@ -33,12 +38,15 @@ class ThoughtFunSearch:
         seed_description: str = '',
         references: dict[str, int] | None = None,
     ) -> Population:
+        """Generate thoughts and code, evaluate valid candidates, and update population."""
         log_path = Path(log_dir) if log_dir else None
         if log_path:
             log_path.mkdir(parents=True, exist_ok=True)
 
         val_instances = val_instances or []
         for step in range(iterations):
+            # Thought and code elites are both reused: thoughts guide the next idea,
+            # while code examples show concrete patterns that survived evaluation.
             elites = diversify_elites(self.population.topk(), k=3, seed=123 + step)
             elite_thoughts = [candidate.thought for candidate in elites if candidate.thought]
             elite_codes = [candidate.code for candidate in elites]
@@ -58,6 +66,8 @@ class ThoughtFunSearch:
                         references=references,
                     )
                     if val_instances:
+                        # Rank on validation when possible so the search rewards
+                        # heuristics that transfer beyond the generation split.
                         val_summary = evaluate_priority_function(
                             method_name=f'thought_funsearch_val_iter{step}_cand{idx}',
                             instances=val_instances,

@@ -1,3 +1,5 @@
+"""Create summary figures from PFSP experiment result tables."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -23,6 +25,7 @@ def _to_float(value: str | None, default: float = 0.0) -> float:
 
 
 def plot_bar(summary_csv: Path, figure_dir: Path) -> None:
+    """Plot baseline average makespan and gap bar charts from a summary CSV."""
     rows = _read_rows(summary_csv)
     methods = [row['method'] for row in rows]
     makespans = [_to_float(row['avg_makespan']) for row in rows]
@@ -48,6 +51,7 @@ def plot_bar(summary_csv: Path, figure_dir: Path) -> None:
 
 
 def plot_method_comparison(table_dir: Path, figure_dir: Path) -> None:
+    """Plot a compact comparison across direct, thought, and ablation outputs."""
     files = {
         'direct': table_dir / 'direct_funsearch_best.csv',
         'thought': table_dir / 'thought_funsearch_best.csv',
@@ -57,6 +61,8 @@ def plot_method_comparison(table_dir: Path, figure_dir: Path) -> None:
     if not existing:
         return
 
+    # Search experiments may be run independently, so the comparison plot is built
+    # from whichever result tables are present instead of requiring a full pipeline.
     labels: list[str] = []
     values: list[float] = []
     for name, path in existing.items():
@@ -79,6 +85,7 @@ def plot_method_comparison(table_dir: Path, figure_dir: Path) -> None:
 
 
 def main() -> None:
+    """Parse CLI arguments and create available result figures."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--summary_csv', type=str, default=str(DEFAULT_TABLE_DIR / 'baseline_summary.csv'))
     parser.add_argument('--table_dir', type=str, default=str(DEFAULT_TABLE_DIR))
